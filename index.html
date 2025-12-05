@@ -1,10 +1,10 @@
-<!DOCTYPE html><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Магазин</title>
-  <!-- УБРАЛ ПРОБЕЛЫ В КОНЦЕ URL -->
+  <!-- ВАЖНО: без пробелов в URL -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     * {
@@ -116,7 +116,6 @@
   </div>
 
   <script>
-    // Проверка: запущен ли из Telegram?
     if (!window.Telegram || !window.Telegram.WebApp) {
       document.getElementById('app').style.display = 'none';
       document.getElementById('error').style.display = 'block';
@@ -210,6 +209,9 @@
 
       cart = {};
       localStorage.removeItem('cart');
+
+      // 🔔 ОТЛАДОЧНЫЙ АЛЕРТ — ЕСЛИ НЕ ПОЯВЛЯЕТСЯ, ЗНАЧИТ КНОПКА НЕ РАБОТАЕТ
+      alert("Отправляю заказ: " + JSON.stringify(order));
 
       WebApp.sendData(JSON.stringify(order));
       WebApp.close();
