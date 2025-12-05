@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Магазин</title>
+  <!-- УБРАЛ ПРОБЕЛЫ В КОНЦЕ URL -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     * {
@@ -36,9 +37,6 @@
       color: #2e8b57;
       font-weight: bold;
       margin: 8px 0;
-    }
-    .out-of-stock {
-      color: #cc0000;
     }
     button {
       padding: 10px 16px;
@@ -80,6 +78,11 @@
     h2 {
       margin: 16px 0;
     }
+    .error {
+      color: red;
+      text-align: center;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
@@ -95,7 +98,6 @@
         <div class="availability">В наличии ✅</div>
         <button class="add-btn" data-id="iphone15pm256">Добавить в корзину</button>
       </div>
-      <!-- Можно добавлять другие товары здесь -->
     </div>
 
     <div id="cart" style="display:none;">
@@ -103,30 +105,36 @@
         <h2>🛒 Корзина</h2>
         <button class="back-btn" id="backToCatalog">← Назад</button>
       </div>
-      <div id="cartItems">
-        <!-- Товары будут здесь -->
-      </div>
+      <div id="cartItems"></div>
       <div id="emptyCart">Корзина пуста</div>
       <button class="confirm-btn" id="confirmOrder" style="display:none;">Оформить заказ</button>
+    </div>
+
+    <div id="error" class="error" style="display:none;">
+      Ошибка: Mini App не запущен из Telegram!
     </div>
   </div>
 
   <script>
+    // Проверка: запущен ли из Telegram?
+    if (!window.Telegram || !window.Telegram.WebApp) {
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('error').style.display = 'block';
+      throw new Error("Not running inside Telegram WebApp");
+    }
+
     const WebApp = window.Telegram.WebApp;
     WebApp.expand();
     WebApp.ready();
 
-    // Состояние корзины
     let cart = JSON.parse(localStorage.getItem('cart')) || {};
 
-    // DOM
     const catalog = document.getElementById('catalog');
     const cartView = document.getElementById('cart');
     const cartItems = document.getElementById('cartItems');
     const emptyCart = document.getElementById('emptyCart');
     const confirmBtn = document.getElementById('confirmOrder');
 
-    // Товары (можно расширять)
     const products = {
       iphone15pm256: {
         name: "iPhone 15 Pro Max 256 ГБ",
@@ -135,7 +143,6 @@
       }
     };
 
-    // Функция обновления корзины
     function updateCartUI() {
       let totalItems = 0;
       cartItems.innerHTML = '';
@@ -146,10 +153,7 @@
             totalItems += cart[id];
             const item = document.createElement('div');
             item.className = 'cart-item';
-            item.innerHTML = `
-              <div>${product.name} × ${cart[id]}</div>
-              <div>${product.price}</div>
-            `;
+            item.innerHTML = `<div>${product.name} × ${cart[id]}</div><div>${product.price}</div>`;
             cartItems.appendChild(item);
           }
         }
@@ -166,7 +170,6 @@
       localStorage.setItem('cart', JSON.stringify(cart));
     }
 
-    // Обработчики
     document.getElementById('showCart').onclick = () => {
       catalog.style.display = 'none';
       cartView.style.display = 'block';
@@ -183,6 +186,7 @@
         const id = btn.dataset.id;
         cart[id] = (cart[id] || 0) + 1;
         alert('Товар добавлен в корзину!');
+        updateCartUI();
       };
     });
 
@@ -204,16 +208,13 @@
         }
       }
 
-      // Очистка корзины
       cart = {};
       localStorage.removeItem('cart');
 
-      // Отправка данных боту
       WebApp.sendData(JSON.stringify(order));
       WebApp.close();
     };
 
-    // Инициализация
     updateCartUI();
   </script>
 </body>
