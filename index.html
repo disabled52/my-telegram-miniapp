@@ -1,3 +1,11 @@
+
+---
+
+## 🔧 Обновлённый код с новым функционалом
+
+Замени весь свой `index.html` на этот:
+
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -22,7 +30,16 @@
       box-shadow: 0 10px 25px rgba(0,0,0,0.05);
     }
     h1 { font-size: 28px; margin-bottom: 8px; color: #082f49; }
-    .subtitle { color: #38bdf8; margin-bottom: 24px; }
+    .subtitle { color: #38bdf8; margin-bottom: 16px; }
+    .idea-box {
+      background: #f0f7ff;
+      border-left: 4px solid #38bdf8;
+      padding: 12px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+      font-style: italic;
+      font-size: 15px;
+    }
     .streak {
       background: #dbeafe;
       color: #1d4ed8;
@@ -33,6 +50,12 @@
       font-weight: bold;
       font-size: 22px;
     }
+    .reward {
+      text-align: center;
+      margin: 12px 0;
+      font-weight: bold;
+      color: #0ea5e9;
+    }
     textarea {
       width: 100%;
       padding: 14px;
@@ -42,18 +65,20 @@
       min-height: 100px;
       margin: 12px 0;
     }
-    button {
-      background: #0ea5e9;
-      color: white;
-      border: none;
+    .btn {
       padding: 14px;
+      border: none;
       border-radius: 12px;
       font-size: 18px;
       font-weight: bold;
       width: 100%;
       cursor: pointer;
+      margin: 8px 0;
     }
-    button:hover { background: #0284c7; }
+    .primary { background: #0ea5e9; color: white; }
+    .primary:hover { background: #0284c7; }
+    .secondary { background: #f1f5f9; color: #334155; }
+    .secondary:hover { background: #e2e8f0; }
     .history { margin-top: 30px; }
     .history h2 { margin: 20px 0 12px; }
     .entry {
@@ -68,10 +93,15 @@
     <h1>🔥 BizStreak</h1>
     <p class="subtitle">Твой путь к бизнесу начинается с одного шага — каждый день</p>
 
-    <div class="streak" id="streak">🔥 Твоя цепочка: <span id="count">0</span> дней</div>
+    <div class="idea-box" id="dailyIdea"></div>
 
-    <textarea id="action" placeholder="Что ты сделал сегодня для своего бизнеса? Например: 'Написал клиенту', 'Записал идею', 'Проанализировал расходы'..."></textarea>
-    <button onclick="logAction()">✅ Зафиксировать шаг</button>
+    <div class="streak" id="streak">🔥 Твоя цепочка: <span id="count">0</span> дней</div>
+    <div class="reward" id="reward"></div>
+
+    <textarea id="action" placeholder="Что ты сделал сегодня для своего бизнеса?"></textarea>
+    <button class="btn primary" onclick="logAction()">✅ Зафиксировать шаг</button>
+    <button class="btn secondary" onclick="resetStreak()">🔄 Я пропустил день — начать заново</button>
+    <button class="btn secondary" onclick="copyReport()">📋 Скопировать отчёт</button>
 
     <div class="history">
       <h2>Твои шаги:</h2>
@@ -80,13 +110,42 @@
   </div>
 
   <script>
+    // База микро-идей
+    const ideas = [
+      "Запиши 3 бизнес-идеи за 5 минут.",
+      "Напиши одному человеку: «Может, тебе нужно то, что я делаю?»",
+      "Представь, что у тебя уже есть первые 10 клиентов. Что им нравится?",
+      "Проанализируй: что мешает тебе начать?",
+      "Создай простой лендинг за 30 минут (даже в Notion!).",
+      "Послушай подкаст о бизнесе — и запиши одну мысль.",
+      "Сделай шаг, даже если не в настроении. Действие > мотивация.",
+      "Спроси у друга: «Что бы ты купил у меня?»",
+      "Изучи, как кто-то запустил похожий проект.",
+      "Прости себя за вчерашнюю прокрастинацию. Сегодня — новый день."
+    ];
+
     // Инициализация
-    const today = new Date().toISOString().split('T')[0];
     let data = JSON.parse(localStorage.getItem('bizstreak')) || { streak: 0, lastDate: '', actions: [] };
+    const today = new Date().toISOString().split('T')[0];
+
+    // Показ случайной идеи
+    function showRandomIdea() {
+      const randomIdea = ideas[Math.floor(Math.random() * ideas.length)];
+      document.getElementById('dailyIdea').textContent = `💡 Идея дня: ${randomIdea}`;
+    }
 
     // Обновление отображения
     function render() {
       document.getElementById('count').textContent = data.streak;
+      
+      // Награды
+      let rewardText = '';
+      if (data.streak >= 30) rewardText = '🚀 Ты — бизнесмен! Твоя привычка устойчива.';
+      else if (data.streak >= 21) rewardText = '🌱 Ты формируешь предпринимательскую привычку!';
+      else if (data.streak >= 7) rewardText = '🎉 Ты в зоне роста!';
+      document.getElementById('reward').textContent = rewardText;
+
+      // История
       const list = document.getElementById('historyList');
       list.innerHTML = data.actions.map(a => 
         `<div class="entry">${a.text}<div class="date">${a.date}</div></div>`
@@ -98,13 +157,13 @@
       const text = document.getElementById('action').value.trim();
       if (!text) return alert('Напиши, что ты сделал!');
       
-      const today = new Date().toISOString().split('T')[0];
-      
-      // Обновляем streak
       if (data.lastDate === today) {
         alert('Ты уже сделал шаг сегодня! Молодец!');
         return;
-      } else if (data.lastDate === new Date(Date.now() - 86400000).toISOString().split('T')[0]) {
+      }
+
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      if (data.lastDate === yesterday || data.lastDate === '') {
         data.streak += 1;
       } else {
         data.streak = 1;
@@ -112,7 +171,7 @@
       
       data.lastDate = today;
       data.actions.unshift({ date: today, text });
-      if (data.actions.length > 20) data.actions.pop();
+      if (data.actions.length > 30) data.actions.pop();
 
       localStorage.setItem('bizstreak', JSON.stringify(data));
       document.getElementById('action').value = '';
@@ -120,6 +179,34 @@
       alert('✅ Шаг зафиксирован! Ты молодец!');
     }
 
+    // Сброс цепочки
+    function resetStreak() {
+      if (confirm('Ты уверен? Твоя цепочка обнулится, но ты начнёшь заново — и это честно.')) {
+        data.streak = 0;
+        data.lastDate = '';
+        localStorage.setItem('bizstreak', JSON.stringify(data));
+        render();
+        alert('Ты снова в игре! Сделай шаг — и цепочка начнётся.');
+      }
+    }
+
+    // Экспорт отчёта
+    function copyReport() {
+      let report = `BizStreak — ${data.streak} дней подряд\n\n`;
+      data.actions.forEach(a => {
+        report += `• ${a.date}: ${a.text}\n`;
+      });
+      report += `\n#bizstreak #микростарт #бизнес`;
+      
+      navigator.clipboard.writeText(report).then(() => {
+        alert('📋 Отчёт скопирован! Вставь в заметки, Instagram или Telegram.');
+      }).catch(() => {
+        alert('Не получилось скопировать. Попробуй выделить текст вручную.');
+      });
+    }
+
+    // Запуск
+    showRandomIdea();
     render();
   </script>
 </body>
