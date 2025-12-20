@@ -1,223 +1,232 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Магазин</title>
-  <!-- ВАЖНО: без пробелов в URL -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+import logging
+from datetime import datetime, date
+from telegram import Update, ReplyKeyboardMarkup
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    MessageHandler,
+    ContextTypes,
+    filters,
+    ConversationHandler
+)
+import sqlite3
+import os
+
+# === Настройка логов ===
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+
+# === Константы ===
+ACTION, CUSTOM_ACTION = range(2)
+DB_PATH = os.getenv('DATABASE_URL', 'bizstreak.db')
+
+# === Инициализация БД ===
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            user_id INTEGER PRIMARY KEY,
+            streak INTEGER DEFAULT 0,
+            last_action_date TEXT
+        )
+    ''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS actions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            action_text TEXT,
+            date TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+# === Вспомогательные функции ===
+def get_user(user_id):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT streak, last_action_date FROM users WHERE user_id = ?", (user_id,))
+    row = c.fetchone()
+    conn.close()
+    return row
+
+def update_streak(user_id):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    today = str(date.today())
+    c.execute("SELECT streak, last_action_date FROM users WHERE user_id = ?", (user_id,))
+    row = c.fetchone()
+    if row:
+        streak, last_date = row
+        if last_date == today:
+            # Уже сделал сегодня
+            conn.close()
+            return streak, False
+        elif last_date == str(date.today().strftime('%Y-%m-%d')):
+            pass
+        elif last_date == str(date.today().strftime('%Y-%m-%d')):
+            pass
+        elif last_date == str(date.today() - timedelta(days=1)):
+            new_streak = streak + 1
+        else:
+            new_streak = 1
+    else:
+        new_streak = 1
+    c.execute("INSERT OR REPLACE INTO users (user_id, streak, last_action_date) VALUES (?, ?, ?)",
+              (user_id, new_streak, today))
+    conn.commit()
+    conn.close()
+    return new_streak, True
+
+def save_action(user_id, text):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("INSERT INTO actions (user_id, action_text, date) VALUES (?, ?, ?)",
+              (user_id, text, str(date.today())))
+    conn.commit()
+    conn.close()
+
+# === Обработчики ===
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        ["🔥 Сделать шаг"],
+        ["📊 Мой прогресс", "💡 Архив идей"]
+    ]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    await update.message.reply_text(
+        "👋 Привет! Я — **BizStreak**.\n\n"
+        "Твоя цель — делать **1 микро-действие в день** для своего бизнеса.\n"
+        "Даже 5 минут — это уже победа.\n\n"
+        "Нажми «🔥 Сделать шаг» — и начни прямо сейчас!",
+        parse_mode='Markdown',
+        reply_markup=reply_markup
+    )
+
+async def show_action_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    actions = [
+        "📝 Записать идею",
+        "💬 Написать потенциальному клиенту",
+        "🔍 Проанализировать вчерашний шаг",
+        "✏️ Свое действие"
+    ]
+    keyboard = [[a] for a in actions]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
+    await update.message.reply_text("Выбери действие:", reply_markup=reply_markup)
+    return ACTION
+
+async def handle_action(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    text = update.message.text
+
+    if text == "✏️ Свое действие":
+        await update.message.reply_text("Напиши, что ты сделаешь сегодня:")
+        return CUSTOM_ACTION
+
+    # Обработка стандартных действий
+    action_map = {
+        "📝 Записать идею": "Записал идею",
+        "💬 Написать потенциальному клиенту": "Написал клиенту",
+        "🔍 Проанализировать вчерашний шаг": "Проанализировал вчерашний шаг"
     }
-    body {
-      background: #f0f0f0;
-      color: #000;
-      padding: 16px;
-      min-height: 100vh;
-    }
-    .header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .product {
-      background: white;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    .product h3 {
-      margin-bottom: 8px;
-    }
-    .availability {
-      color: #2e8b57;
-      font-weight: bold;
-      margin: 8px 0;
-    }
-    button {
-      padding: 10px 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      margin-top: 8px;
-    }
-    .add-btn {
-      background: #0088cc;
-      color: white;
-      width: 100%;
-    }
-    .cart-btn {
-      background: #ff6f00;
-      color: white;
-      width: 100%;
-    }
-    .back-btn {
-      background: #666;
-      color: white;
-      width: 100%;
-    }
-    .cart-item {
-      background: white;
-      padding: 12px;
-      border-radius: 8px;
-      margin: 8px 0;
-      display: flex;
-      justify-content: space-between;
-    }
-    .confirm-btn {
-      background: #2e8b57;
-      color: white;
-      width: 100%;
-      margin-top: 16px;
-    }
-    h2 {
-      margin: 16px 0;
-    }
-    .error {
-      color: red;
-      text-align: center;
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
-  <div id="app">
-    <div id="catalog">
-      <div class="header">
-        <h2>🛍️ Магазин</h2>
-        <button class="cart-btn" id="showCart">Корзина</button>
-      </div>
-      <div class="product">
-        <h3>📱 iPhone 15 Pro Max 256 ГБ</h3>
-        <p>Цвет: Титан, 256 ГБ памяти</p>
-        <div class="availability">В наличии ✅</div>
-        <button class="add-btn" data-id="iphone15pm256">Добавить в корзину</button>
-      </div>
-    </div>
+    log_text = action_map.get(text, text)
+    save_action(user_id, log_text)
+    streak, is_new = update_streak(user_id)
 
-    <div id="cart" style="display:none;">
-      <div class="header">
-        <h2>🛒 Корзина</h2>
-        <button class="back-btn" id="backToCatalog">← Назад</button>
-      </div>
-      <div id="cartItems"></div>
-      <div id="emptyCart">Корзина пуста</div>
-      <button class="confirm-btn" id="confirmOrder" style="display:none;">Оформить заказ</button>
-    </div>
+    if is_new:
+        await update.message.reply_text(
+            f"✅ Отлично! Это твой **{streak}-й день подряд**!\n\n"
+            "Не прерывай цепочку — завтра снова жду тебя!",
+            reply_markup=ReplyKeyboardMarkup([
+                ["🔥 Сделать шаг"],
+                ["📊 Мой прогресс", "💡 Архив идей"]
+            ], resize_keyboard=True)
+        )
+    else:
+        await update.message.reply_text(
+            "Ты уже сделал шаг сегодня! Молодец!",
+            reply_markup=ReplyKeyboardMarkup([
+                ["🔥 Сделать шаг"],
+                ["📊 Мой прогресс", "💡 Архив идей"]
+            ], resize_keyboard=True)
+        )
+    return ConversationHandler.END
 
-    <div id="error" class="error" style="display:none;">
-      Ошибка: Mini App не запущен из Telegram!
-    </div>
-  </div>
+async def handle_custom_action(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    text = f"Сделал: {update.message.text}"
+    save_action(user_id, text)
+    streak, is_new = update_streak(user_id)
 
-  <script>
-    if (!window.Telegram || !window.Telegram.WebApp) {
-      document.getElementById('app').style.display = 'none';
-      document.getElementById('error').style.display = 'block';
-      throw new Error("Not running inside Telegram WebApp");
-    }
+    if is_new:
+        await update.message.reply_text(
+            f"✅ Отлично! Это твой **{streak}-й день подряд**!",
+            reply_markup=ReplyKeyboardMarkup([
+                ["🔥 Сделать шаг"],
+                ["📊 Мой прогресс", "💡 Архив идей"]
+            ], resize_keyboard=True)
+        )
+    else:
+        await update.message.reply_text("Ты уже сделал шаг сегодня!")
 
-    const WebApp = window.Telegram.WebApp;
-    WebApp.expand();
-    WebApp.ready();
+    return ConversationHandler.END
 
-    let cart = JSON.parse(localStorage.getItem('cart')) || {};
+async def show_progress(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    row = get_user(user_id)
+    if row:
+        streak, last_date = row
+        await update.message.reply_text(
+            f"📈 Твой прогресс:\n\n"
+            f"🔥 Цепочка дней: **{streak}**\n"
+            f"📅 Последнее действие: {last_date}",
+            parse_mode='Markdown'
+        )
+    else:
+        await update.message.reply_text("Ты ещё не сделал ни одного шага. Начни сегодня!")
 
-    const catalog = document.getElementById('catalog');
-    const cartView = document.getElementById('cart');
-    const cartItems = document.getElementById('cartItems');
-    const emptyCart = document.getElementById('emptyCart');
-    const confirmBtn = document.getElementById('confirmOrder');
+async def show_archive(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT action_text, date FROM actions WHERE user_id = ? ORDER BY date DESC LIMIT 10", (user_id,))
+    rows = c.fetchall()
+    conn.close()
 
-    const products = {
-      iphone15pm256: {
-        name: "iPhone 15 Pro Max 256 ГБ",
-        price: "120000 руб.",
-        inStock: true
-      }
-    };
+    if rows:
+        msg = "💡 Твои последние шаги:\n\n"
+        for action, d in rows:
+            msg += f"• {d}: {action}\n"
+        await update.message.reply_text(msg)
+    else:
+        await update.message.reply_text("Твой архив пуст. Сделай первый шаг!")
 
-    function updateCartUI() {
-      let totalItems = 0;
-      cartItems.innerHTML = '';
-      for (const id in cart) {
-        if (cart[id] > 0) {
-          const product = products[id];
-          if (product) {
-            totalItems += cart[id];
-            const item = document.createElement('div');
-            item.className = 'cart-item';
-            item.innerHTML = `<div>${product.name} × ${cart[id]}</div><div>${product.price}</div>`;
-            cartItems.appendChild(item);
-          }
-        }
-      }
+# === Запуск ===
+def main():
+    init_db()
+    TOKEN = os.getenv("BOT_TOKEN")
+    if not TOKEN:
+        raise ValueError("Добавь BOT_TOKEN в переменные окружения!")
 
-      if (totalItems === 0) {
-        emptyCart.style.display = 'block';
-        confirmBtn.style.display = 'none';
-      } else {
-        emptyCart.style.display = 'none';
-        confirmBtn.style.display = 'block';
-      }
+    app = Application.builder().token(TOKEN).build()
 
-      localStorage.setItem('cart', JSON.stringify(cart));
-    }
+    conv_handler = ConversationHandler(
+        entry_points=[MessageHandler(filters.Regex("^🔥 Сделать шаг$"), show_action_menu)],
+        states={
+            ACTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_action)],
+            CUSTOM_ACTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_custom_action)],
+        },
+        fallbacks=[CommandHandler("start", start)]
+    )
 
-    document.getElementById('showCart').onclick = () => {
-      catalog.style.display = 'none';
-      cartView.style.display = 'block';
-      updateCartUI();
-    };
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(MessageHandler(filters.Regex("^📊 Мой прогресс$"), show_progress))
+    app.add_handler(MessageHandler(filters.Regex("^💡 Архив идей$"), show_archive))
+    app.add_handler(conv_handler)
 
-    document.getElementById('backToCatalog').onclick = () => {
-      cartView.style.display = 'none';
-      catalog.style.display = 'block';
-    };
+    app.run_polling()
 
-    document.querySelectorAll('.add-btn').forEach(btn => {
-      btn.onclick = () => {
-        const id = btn.dataset.id;
-        cart[id] = (cart[id] || 0) + 1;
-        alert('Товар добавлен в корзину!');
-        updateCartUI();
-      };
-    });
-
-    document.getElementById('confirmOrder').onclick = () => {
-      const order = {
-        type: "new_order",
-        items: [],
-        total_items: 0
-      };
-
-      for (const id in cart) {
-        if (cart[id] > 0) {
-          order.items.push({
-            product_id: id,
-            name: products[id].name,
-            quantity: cart[id]
-          });
-          order.total_items += cart[id];
-        }
-      }
-
-      cart = {};
-      localStorage.removeItem('cart');
-
-      // 🔔 ОТЛАДОЧНЫЙ АЛЕРТ — ЕСЛИ НЕ ПОЯВЛЯЕТСЯ, ЗНАЧИТ КНОПКА НЕ РАБОТАЕТ
-      alert("Отправляю заказ: " + JSON.stringify(order));
-
-      WebApp.sendData(JSON.stringify(order));
-      WebApp.close();
-    };
-
-    updateCartUI();
-  </script>
-</body>
-</html>
+if __name__ == "__main__":
+    main()
