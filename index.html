@@ -1,107 +1,199 @@
-
----
-
-## 🔧 Обновлённый код с новым функционалом
-
-Замени весь свой `index.html` на этот:
-
-```html
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>BizStreak — Твой путь к бизнесу</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #f0f9ff;
+      --text: #0c4a6e;
+      --card: white;
+      --btn: #0ea5e9;
+      --btn-hover: #0284c7;
+      --border: #cbd5e1;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+    [data-theme="dark"] {
+      --bg: #0c1427;
+      --text: #e0f2fe;
+      --card: #121e34;
+      --btn: #38bdf8;
+      --btn-hover: #0ea5e9;
+      --border: #334155;
+      --success: #34d399;
+      --warning: #fbbf24;
+    }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f0f9ff;
-      color: #0c4a6e;
+      background: var(--bg);
+      color: var(--text);
       padding: 20px;
       line-height: 1.6;
+      transition: background 0.3s;
     }
     .container {
       max-width: 600px;
       margin: 0 auto;
-      background: white;
+      background: var(--card);
       border-radius: 20px;
       padding: 24px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      transition: background 0.3s;
     }
-    h1 { font-size: 28px; margin-bottom: 8px; color: #082f49; }
-    .subtitle { color: #38bdf8; margin-bottom: 16px; }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    h1 { font-size: 28px; color: var(--text); }
+    .subtitle { color: var(--btn); margin-bottom: 16px; }
+    .theme-toggle {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--text);
+    }
     .idea-box {
-      background: #f0f7ff;
-      border-left: 4px solid #38bdf8;
+      background: var(--bg);
+      border-left: 4px solid var(--btn);
       padding: 12px;
       border-radius: 0 8px 8px 0;
       margin: 16px 0;
       font-style: italic;
       font-size: 15px;
+      color: var(--text);
     }
     .streak {
-      background: #dbeafe;
-      color: #1d4ed8;
+      background: var(--bg);
+      color: var(--text);
       padding: 16px;
       border-radius: 14px;
       text-align: center;
       margin: 20px 0;
       font-weight: bold;
       font-size: 22px;
+      border: 1px solid var(--border);
     }
-    .reward {
-      text-align: center;
-      margin: 12px 0;
+    .goal-bar {
+      background: var(--bg);
+      padding: 12px;
+      border-radius: 12px;
+      margin: 16px 0;
       font-weight: bold;
-      color: #0ea5e9;
+      border: 1px solid var(--border);
     }
+    .reward, .analysis { text-align: center; margin: 12px 0; font-weight: bold; color: var(--success); }
+    .roadmap {
+      display: flex;
+      justify-content: space-between;
+      margin: 20px 0;
+      position: relative;
+    }
+    .roadmap::before {
+      content: "";
+      position: absolute;
+      top: 16px;
+      left: 20%;
+      right: 20%;
+      height: 2px;
+      background: var(--border);
+      z-index: 1;
+    }
+    .stage { 
+      width: 24px; 
+      height: 24px; 
+      background: var(--border); 
+      border-radius: 50%; 
+      z-index: 2;
+      position: relative;
+    }
+    .stage.active { background: var(--success); }
     textarea {
       width: 100%;
       padding: 14px;
-      border: 1px solid #cbd5e1;
+      border: 1px solid var(--border);
       border-radius: 12px;
       font-size: 16px;
       min-height: 100px;
       margin: 12px 0;
+      background: var(--card);
+      color: var(--text);
     }
     .btn {
       padding: 14px;
       border: none;
       border-radius: 12px;
-      font-size: 18px;
+      font-size: 17px;
       font-weight: bold;
       width: 100%;
       cursor: pointer;
       margin: 8px 0;
+      transition: background 0.2s;
     }
-    .primary { background: #0ea5e9; color: white; }
-    .primary:hover { background: #0284c7; }
-    .secondary { background: #f1f5f9; color: #334155; }
-    .secondary:hover { background: #e2e8f0; }
+    .primary { background: var(--btn); color: white; }
+    .primary:hover { background: var(--btn-hover); }
+    .secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+    .secondary:hover { background: var(--border); }
     .history { margin-top: 30px; }
     .history h2 { margin: 20px 0 12px; }
     .entry {
       padding: 10px 0;
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid var(--border);
     }
-    .date { color: #94a3b8; font-size: 14px; }
+    .date { color: var(--warning); font-size: 14px; }
+    .confetti {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1000;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🔥 BizStreak</h1>
-    <p class="subtitle">Твой путь к бизнесу начинается с одного шага — каждый день</p>
+    <div class="header">
+      <div>
+        <h1>🔥 BizStreak</h1>
+        <p class="subtitle">Твой путь к бизнесу начинается с одного шага — каждый день</p>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    </div>
 
     <div class="idea-box" id="dailyIdea"></div>
 
     <div class="streak" id="streak">🔥 Твоя цепочка: <span id="count">0</span> дней</div>
     <div class="reward" id="reward"></div>
 
+    <div class="goal-bar" id="goalBar">🎯 Цель: <span id="goalText">30 дней</span> → [<span id="progressBar">░░░░░░░░░░</span>] <span id="progressText">0/30</span></div>
+
+    <div class="roadmap">
+      <div class="stage" id="stage1"></div>
+      <div class="stage" id="stage2"></div>
+      <div class="stage" id="stage3"></div>
+      <div class="stage" id="stage4"></div>
+    </div>
+
     <textarea id="action" placeholder="Что ты сделал сегодня для своего бизнеса?"></textarea>
     <button class="btn primary" onclick="logAction()">✅ Зафиксировать шаг</button>
+    <button class="btn secondary" onclick="openFears()">Что меня останавливает?</button>
     <button class="btn secondary" onclick="resetStreak()">🔄 Я пропустил день — начать заново</button>
     <button class="btn secondary" onclick="copyReport()">📋 Скопировать отчёт</button>
+    <button class="btn secondary" onclick="exportPDF()">📤 Экспорт в PDF</button>
+
+    <h3 style="margin: 20px 0 10px;">Дневник предпринимателя</h3>
+    <textarea id="journal" placeholder="Мои мысли сегодня..."></textarea>
+
+    <div class="analysis" id="analysis"></div>
 
     <div class="history">
       <h2>Твои шаги:</h2>
@@ -110,7 +202,7 @@
   </div>
 
   <script>
-    // База микро-идей
+    // База идей
     const ideas = [
       "Запиши 3 бизнес-идеи за 5 минут.",
       "Напиши одному человеку: «Может, тебе нужно то, что я делаю?»",
@@ -125,34 +217,88 @@
     ];
 
     // Инициализация
-    let data = JSON.parse(localStorage.getItem('bizstreak')) || { streak: 0, lastDate: '', actions: [] };
+    let data = JSON.parse(localStorage.getItem('bizstreak')) || {
+      streak: 0,
+      lastDate: '',
+      actions: [],
+      journal: '',
+      goal: 30,
+      stage: 1
+    };
     const today = new Date().toISOString().split('T')[0];
 
-    // Показ случайной идеи
+    // Тема
+    function toggleTheme() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+      document.querySelector('.theme-toggle').textContent = isDark ? '🌙' : '☀️';
+    }
+    const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.querySelector('.theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+    // Показ идеи
     function showRandomIdea() {
       const randomIdea = ideas[Math.floor(Math.random() * ideas.length)];
       document.getElementById('dailyIdea').textContent = `💡 Идея дня: ${randomIdea}`;
     }
 
-    // Обновление отображения
+    // Обновление интерфейса
     function render() {
+      // Стreak
       document.getElementById('count').textContent = data.streak;
       
       // Награды
       let rewardText = '';
       if (data.streak >= 30) rewardText = '🚀 Ты — бизнесмен! Твоя привычка устойчива.';
-      else if (data.streak >= 21) rewardText = '🌱 Ты формируешь предпринимательскую привычку!';
+      else if (data.streak >= 21) rewardText = '🌱 Твоя предпринимательская привычка закреплена!';
       else if (data.streak >= 7) rewardText = '🎉 Ты в зоне роста!';
       document.getElementById('reward').textContent = rewardText;
+
+      // Цель
+      const progress = Math.min(data.streak, data.goal);
+      const percent = Math.floor((progress / data.goal) * 100);
+      const bar = '█'.repeat(Math.floor(percent / 10)).padEnd(10, '░');
+      document.getElementById('progressBar').textContent = bar;
+      document.getElementById('progressText').textContent = `${progress}/${data.goal}`;
+      
+      // Дорожка
+      const stages = document.querySelectorAll('.stage');
+      stages.forEach((stage, i) => {
+        stage.classList.toggle('active', i + 1 <= data.stage);
+      });
+
+      // Дневник
+      document.getElementById('journal').value = data.journal;
 
       // История
       const list = document.getElementById('historyList');
       list.innerHTML = data.actions.map(a => 
         `<div class="entry">${a.text}<div class="date">${a.date}</div></div>`
       ).join('');
+
+      // Анализ каждые 7 дней
+      if (data.streak > 0 && data.streak % 7 === 0) {
+        const actionsText = data.actions.map(a => a.text).join(' ');
+        let insight = 'Продолжай в том же духе!';
+        if (actionsText.includes('клиент') || actionsText.includes('написал')) {
+          insight = 'Ты отлично общаешься с клиентами — это твоя сила!';
+        } else if (actionsText.includes('идея') || actionsText.includes('записал')) {
+          insight = 'Ты генерируешь идеи — теперь выбери одну и протестируй!';
+        }
+        document.getElementById('analysis').textContent = `🧠 Недельный анализ: ${insight}`;
+      } else {
+        document.getElementById('analysis').textContent = '';
+      }
+
+      // Обновление стадии
+      if (data.streak >= 5 && data.stage < 2) data.stage = 2;
+      if (data.streak >= 15 && data.stage < 3) data.stage = 3;
+      if (data.streak >= 30 && data.stage < 4) data.stage = 4;
     }
 
-    // Сохранение действия
+    // Действие
     function logAction() {
       const text = document.getElementById('action').value.trim();
       if (!text) return alert('Напиши, что ты сделал!');
@@ -171,19 +317,36 @@
       
       data.lastDate = today;
       data.actions.unshift({ date: today, text });
-      if (data.actions.length > 30) data.actions.pop();
-
+      if (data.actions.length > 50) data.actions.pop();
       localStorage.setItem('bizstreak', JSON.stringify(data));
       document.getElementById('action').value = '';
       render();
+
+      // Конфетти при 7 днях
+      if (data.streak === 7) {
+        createConfetti();
+      }
       alert('✅ Шаг зафиксирован! Ты молодец!');
     }
 
-    // Сброс цепочки
+    // Страхи
+    function openFears() {
+      const fear = prompt('Что тебя останавливает?\n1. Страх неудачи\n2. Нет времени\n3. Не знаю с чего\n4. Боюсь осуждения');
+      const responses = {
+        '1': 'Страх неудачи — признак, что ты растёшь. Ошибки — это данные, а не провал.',
+        '2': 'Время появляется, когда ты делаешь шаг. Начни с 5 минут.',
+        '3': 'Не нужно "знать всё". Нужно сделать первое действие.',
+        '4': 'Ты не для всех. Ты — для своих клиентов.'
+      };
+      alert(responses[fear] || 'Ты сильнее, чем думаешь. Сделай шаг — и страх уйдёт.');
+    }
+
+    // Сброс
     function resetStreak() {
       if (confirm('Ты уверен? Твоя цепочка обнулится, но ты начнёшь заново — и это честно.')) {
         data.streak = 0;
         data.lastDate = '';
+        data.stage = 1;
         localStorage.setItem('bizstreak', JSON.stringify(data));
         render();
         alert('Ты снова в игре! Сделай шаг — и цепочка начнётся.');
@@ -196,14 +359,86 @@
       data.actions.forEach(a => {
         report += `• ${a.date}: ${a.text}\n`;
       });
+      if (data.journal) {
+        report += `\nДневник:\n${data.journal}\n`;
+      }
       report += `\n#bizstreak #микростарт #бизнес`;
       
       navigator.clipboard.writeText(report).then(() => {
         alert('📋 Отчёт скопирован! Вставь в заметки, Instagram или Telegram.');
-      }).catch(() => {
-        alert('Не получилось скопировать. Попробуй выделить текст вручную.');
       });
     }
+
+    // Экспорт в PDF
+    function exportPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFontSize(20);
+      doc.text('BizStreak — Твой путь к бизнесу', 20, 20);
+      doc.setFontSize(12);
+      doc.text(`Цепочка: ${data.streak} дней`, 20, 30);
+      let y = 40;
+      data.actions.slice(0, 20).forEach(a => {
+        doc.text(`• ${a.date}: ${a.text}`, 20, y);
+        y += 6;
+      });
+      if (data.journal) {
+        doc.text('Дневник:', 20, y + 10);
+        const lines = doc.splitTextToSize(data.journal, 170);
+        doc.text(lines, 20, y + 16);
+      }
+      doc.save('bizstreak-report.pdf');
+    }
+
+    // Конфетти
+    function createConfetti() {
+      const canvas = document.createElement('canvas');
+      canvas.className = 'confetti';
+      document.body.appendChild(canvas);
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const pieces = [];
+      const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722'];
+      for (let i = 0; i < 150; i++) {
+        pieces.push({
+          x: Math.random() * canvas.width,
+          y: -20,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          radius: Math.random() * 4 + 2,
+          speed: Math.random() * 3 + 2,
+          angle: Math.random() * Math.PI * 2,
+          spin: Math.random() * 0.2 - 0.1
+        });
+      }
+      let time = 0;
+      const animate = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let alive = false;
+        pieces.forEach(p => {
+          p.y += p.speed;
+          p.x += Math.sin(time * 0.01 + p.angle) * 2;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fill();
+          if (p.y < canvas.height) alive = true;
+        });
+        time++;
+        if (alive && time < 300) {
+          requestAnimationFrame(animate);
+        } else {
+          canvas.remove();
+        }
+      };
+      animate();
+    }
+
+    // Сохранение дневника при потере фокуса
+    document.getElementById('journal').addEventListener('blur', () => {
+      data.journal = document.getElementById('journal').value;
+      localStorage.setItem('bizstreak', JSON.stringify(data));
+    });
 
     // Запуск
     showRandomIdea();
