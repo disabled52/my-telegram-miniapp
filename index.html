@@ -217,13 +217,14 @@
     ];
 
     // Инициализация
-    let data = JSON.parse(localStorage.getItem('bizstreak')) || {
-      streak: 0,
-      lastDate: '',
-      actions: [],
-      journal: '',
-      goal: 30,
-      stage: 1
+    let rawData = JSON.parse(localStorage.getItem('bizstreak'));
+    let data = {
+      streak: parseInt(rawData?.streak) || 0,
+      lastDate: rawData?.lastDate || '',
+      actions: Array.isArray(rawData?.actions) ? rawData.actions : [],
+      journal: rawData?.journal || '',
+      goal: parseInt(rawData?.goal) || 30,
+      stage: parseInt(rawData?.stage) || 1
     };
     const today = new Date().toISOString().split('T')[0];
 
@@ -246,39 +247,37 @@
 
     // Обновление интерфейса
     function render() {
-      // Стreak
+      // Приведение к числу (защита от NaN)
+      data.streak = parseInt(data.streak) || 0;
+      data.goal = parseInt(data.goal) || 30;
+      data.stage = parseInt(data.stage) || 1;
+
       document.getElementById('count').textContent = data.streak;
       
-      // Награды
       let rewardText = '';
       if (data.streak >= 30) rewardText = '🚀 Ты — бизнесмен! Твоя привычка устойчива.';
       else if (data.streak >= 21) rewardText = '🌱 Твоя предпринимательская привычка закреплена!';
       else if (data.streak >= 7) rewardText = '🎉 Ты в зоне роста!';
       document.getElementById('reward').textContent = rewardText;
 
-      // Цель
       const progress = Math.min(data.streak, data.goal);
       const percent = Math.floor((progress / data.goal) * 100);
       const bar = '█'.repeat(Math.floor(percent / 10)).padEnd(10, '░');
       document.getElementById('progressBar').textContent = bar;
       document.getElementById('progressText').textContent = `${progress}/${data.goal}`;
       
-      // Дорожка
       const stages = document.querySelectorAll('.stage');
       stages.forEach((stage, i) => {
         stage.classList.toggle('active', i + 1 <= data.stage);
       });
 
-      // Дневник
       document.getElementById('journal').value = data.journal;
 
-      // История
       const list = document.getElementById('historyList');
       list.innerHTML = data.actions.map(a => 
         `<div class="entry">${a.text}<div class="date">${a.date}</div></div>`
       ).join('');
 
-      // Анализ каждые 7 дней
       if (data.streak > 0 && data.streak % 7 === 0) {
         const actionsText = data.actions.map(a => a.text).join(' ');
         let insight = 'Продолжай в том же духе!';
@@ -292,7 +291,6 @@
         document.getElementById('analysis').textContent = '';
       }
 
-      // Обновление стадии
       if (data.streak >= 5 && data.stage < 2) data.stage = 2;
       if (data.streak >= 15 && data.stage < 3) data.stage = 3;
       if (data.streak >= 30 && data.stage < 4) data.stage = 4;
@@ -310,7 +308,7 @@
 
       const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
       if (data.lastDate === yesterday || data.lastDate === '') {
-        data.streak += 1;
+        data.streak = (parseInt(data.streak) || 0) + 1;
       } else {
         data.streak = 1;
       }
@@ -318,11 +316,20 @@
       data.lastDate = today;
       data.actions.unshift({ date: today, text });
       if (data.actions.length > 50) data.actions.pop();
-      localStorage.setItem('bizstreak', JSON.stringify(data));
+
+      // Сохраняем только числа как числа
+      localStorage.setItem('bizstreak', JSON.stringify({
+        streak: data.streak,
+        lastDate: data.lastDate,
+        actions: data.actions,
+        journal: data.journal,
+        goal: data.goal,
+        stage: data.stage
+      }));
+
       document.getElementById('action').value = '';
       render();
 
-      // Конфетти при 7 днях
       if (data.streak === 7) {
         createConfetti();
       }
@@ -434,7 +441,7 @@
       animate();
     }
 
-    // Сохранение дневника при потере фокуса
+    // Сохранение дневника
     document.getElementById('journal').addEventListener('blur', () => {
       data.journal = document.getElementById('journal').value;
       localStorage.setItem('bizstreak', JSON.stringify(data));
