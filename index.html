@@ -1,455 +1,393 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="light">
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>BizStreak — Твой путь к бизнесу</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AutoPilot.Marketing v2 — умный маркетинг</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
-      --bg: #f0f9ff;
-      --text: #0c4a6e;
-      --card: white;
-      --btn: #0ea5e9;
-      --btn-hover: #0284c7;
-      --border: #cbd5e1;
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
       --success: #10b981;
       --warning: #f59e0b;
-    }
-    [data-theme="dark"] {
-      --bg: #0c1427;
-      --text: #e0f2fe;
-      --card: #121e34;
-      --btn: #38bdf8;
-      --btn-hover: #0ea5e9;
-      --border: #334155;
-      --success: #34d399;
-      --warning: #fbbf24;
+      --light: #f8fafc;
+      --gray: #64748b;
+      --dark: #1e293b;
+      --card: #ffffff;
     }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      padding: 20px;
-      line-height: 1.6;
-      transition: background 0.3s;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--light);
+      margin: 0;
+      padding: 0;
+      color: var(--dark);
     }
     .container {
-      max-width: 600px;
+      max-width: 850px;
       margin: 0 auto;
       background: var(--card);
       border-radius: 20px;
-      padding: 24px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-      transition: background 0.3s;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      overflow: hidden;
     }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-    h1 { font-size: 28px; color: var(--text); }
-    .subtitle { color: var(--btn); margin-bottom: 16px; }
-    .theme-toggle {
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      color: var(--text);
-    }
-    .idea-box {
-      background: var(--bg);
-      border-left: 4px solid var(--btn);
-      padding: 12px;
-      border-radius: 0 8px 8px 0;
-      margin: 16px 0;
-      font-style: italic;
-      font-size: 15px;
-      color: var(--text);
-    }
-    .streak {
-      background: var(--bg);
-      color: var(--text);
-      padding: 16px;
-      border-radius: 14px;
+    header {
+      background: linear-gradient(135deg, var(--primary), #7e22ce);
+      color: white;
+      padding: 30px 24px;
       text-align: center;
-      margin: 20px 0;
-      font-weight: bold;
-      font-size: 22px;
-      border: 1px solid var(--border);
     }
-    .goal-bar {
-      background: var(--bg);
-      padding: 12px;
-      border-radius: 12px;
-      margin: 16px 0;
-      font-weight: bold;
-      border: 1px solid var(--border);
+    header h1 { margin: 0; font-weight: 800; font-size: 28px; }
+    header p { opacity: 0.95; margin-top: 8px; font-size: 17px; }
+
+    .screen { display: none; padding: 30px; }
+    .active { display: block !important; }
+
+    .form-group {
+      margin-bottom: 22px;
     }
-    .reward, .analysis { text-align: center; margin: 12px 0; font-weight: bold; color: var(--success); }
-    .roadmap {
-      display: flex;
-      justify-content: space-between;
-      margin: 20px 0;
-      position: relative;
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--dark);
     }
-    .roadmap::before {
-      content: "";
-      position: absolute;
-      top: 16px;
-      left: 20%;
-      right: 20%;
-      height: 2px;
-      background: var(--border);
-      z-index: 1;
-    }
-    .stage { 
-      width: 24px; 
-      height: 24px; 
-      background: var(--border); 
-      border-radius: 50%; 
-      z-index: 2;
-      position: relative;
-    }
-    .stage.active { background: var(--success); }
-    textarea {
+    input, select, textarea {
       width: 100%;
       padding: 14px;
-      border: 1px solid var(--border);
+      border: 1px solid #cbd5e1;
       border-radius: 12px;
       font-size: 16px;
-      min-height: 100px;
-      margin: 12px 0;
-      background: var(--card);
-      color: var(--text);
+      box-sizing: border-box;
     }
-    .btn {
-      padding: 14px;
+    button {
+      background: var(--primary);
+      color: white;
       border: none;
+      padding: 16px;
       border-radius: 12px;
       font-size: 17px;
-      font-weight: bold;
-      width: 100%;
+      font-weight: 600;
       cursor: pointer;
-      margin: 8px 0;
+      width: 100%;
+      margin-top: 10px;
       transition: background 0.2s;
     }
-    .primary { background: var(--btn); color: white; }
-    .primary:hover { background: var(--btn-hover); }
-    .secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
-    .secondary:hover { background: var(--border); }
-    .history { margin-top: 30px; }
-    .history h2 { margin: 20px 0 12px; }
-    .entry {
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
+    button:hover { background: var(--primary-dark); }
+    button.secondary {
+      background: #f1f5f9;
+      color: var(--dark);
     }
-    .date { color: var(--warning); font-size: 14px; }
-    .confetti {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 1000;
+    button.secondary:hover { background: #e2e8f0; }
+
+    .result-card {
+      background: #f8fafc;
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 20px;
+      border: 1px solid #e2e8f0;
+    }
+    .score-display {
+      text-align: center;
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--success);
+      margin: 15px 0;
+    }
+    .niche-badge {
+      background: #eef2ff;
+      color: var(--primary-dark);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 15px;
+    }
+    .rec-item {
+      background: white;
+      padding: 20px;
+      border-radius: 14px;
+      margin: 18px 0;
+      border-left: 4px solid var(--primary);
+      position: relative;
+    }
+    .impact-tag {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: var(--warning);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .roi-preview {
+      background: #ecfdf5;
+      color: #065f46;
+      padding: 10px;
+      border-radius: 10px;
+      margin-top: 12px;
+      font-weight: 600;
+    }
+    .example {
+      background: #f0f9ff;
+      border-left: 3px solid #38bdf8;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 12px;
+      font-style: italic;
+      font-size: 14px;
+    }
+    .checkbox-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .checkbox-group input {
+      width: auto;
+      margin-right: 8px;
+    }
+    .feedback-form {
+      margin-top: 30px;
+      padding-top: 25px;
+      border-top: 1px dashed #cbd5e1;
+    }
+    .total-impact {
+      text-align: center;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 20px 0;
+      padding: 15px;
+      background: #eef2ff;
+      border-radius: 12px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <div>
-        <h1>🔥 BizStreak</h1>
-        <p class="subtitle">Твой путь к бизнесу начинается с одного шага — каждый день</p>
+
+<div class="container">
+  <!-- Экран 1: Вход -->
+  <div id="screen-login" class="screen active">
+    <header>
+      <h1>🚀 AutoPilot.Marketing</h1>
+      <p>Маркетинг, который улучшается сам</p>
+    </header>
+    <div style="padding: 30px;">
+      <div class="form-group">
+        <label>Ваш email</label>
+        <input type="email" id="user-email" placeholder="you@company.com" required>
       </div>
-      <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
-    </div>
-
-    <div class="idea-box" id="dailyIdea"></div>
-
-    <div class="streak" id="streak">🔥 Твоя цепочка: <span id="count">0</span> дней</div>
-    <div class="reward" id="reward"></div>
-
-    <div class="goal-bar" id="goalBar">🎯 Цель: <span id="goalText">30 дней</span> → [<span id="progressBar">░░░░░░░░░░</span>] <span id="progressText">0/30</span></div>
-
-    <div class="roadmap">
-      <div class="stage" id="stage1"></div>
-      <div class="stage" id="stage2"></div>
-      <div class="stage" id="stage3"></div>
-      <div class="stage" id="stage4"></div>
-    </div>
-
-    <textarea id="action" placeholder="Что ты сделал сегодня для своего бизнеса?"></textarea>
-    <button class="btn primary" onclick="logAction()">✅ Зафиксировать шаг</button>
-    <button class="btn secondary" onclick="openFears()">Что меня останавливает?</button>
-    <button class="btn secondary" onclick="resetStreak()">🔄 Я пропустил день — начать заново</button>
-    <button class="btn secondary" onclick="copyReport()">📋 Скопировать отчёт</button>
-    <button class="btn secondary" onclick="exportPDF()">📤 Экспорт в PDF</button>
-
-    <h3 style="margin: 20px 0 10px;">Дневник предпринимателя</h3>
-    <textarea id="journal" placeholder="Мои мысли сегодня..."></textarea>
-
-    <div class="analysis" id="analysis"></div>
-
-    <div class="history">
-      <h2>Твои шаги:</h2>
-      <div id="historyList"></div>
+      <button onclick="startSession()">Продолжить →</button>
     </div>
   </div>
 
-  <script>
-    // База идей
-    const ideas = [
-      "Запиши 3 бизнес-идеи за 5 минут.",
-      "Напиши одному человеку: «Может, тебе нужно то, что я делаю?»",
-      "Представь, что у тебя уже есть первые 10 клиентов. Что им нравится?",
-      "Проанализируй: что мешает тебе начать?",
-      "Создай простой лендинг за 30 минут (даже в Notion!).",
-      "Послушай подкаст о бизнесе — и запиши одну мысль.",
-      "Сделай шаг, даже если не в настроении. Действие > мотивация.",
-      "Спроси у друга: «Что бы ты купил у меня?»",
-      "Изучи, как кто-то запустил похожий проект.",
-      "Прости себя за вчерашнюю прокрастинацию. Сегодня — новый день."
-    ];
+  <!-- Экран 2: Опрос -->
+  <div id="screen-survey" class="screen">
+    <header>
+      <h1>🔍 Краткий опрос</h1>
+      <p>Чтобы дать персонализированные рекомендации</p>
+    </header>
+    <div style="padding: 30px;">
+      <div class="form-group">
+        <label>Ваш тип бизнеса</label>
+        <select id="niche">
+          <option value="ecommerce">E-commerce (онлайн-магазин)</option>
+          <option value="saas">SaaS / IT-продукт</option>
+          <option value="coaching">Коучинг / консультации</option>
+          <option value="agency">Агентство</option>
+          <option value="content">Контент / медиа</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Ваш сайт</label>
+        <input type="url" id="website" placeholder="https://ваш-сайт.рф" value="https://example.com">
+      </div>
+      <div class="form-group">
+        <label>Среднее количество лидов/продаж в неделю</label>
+        <input type="number" id="volume" min="1" value="50">
+      </div>
+      <div class="form-group">
+        <label>Основная проблема</label>
+        <select id="pain">
+          <option>Низкая конверсия</option>
+          <option>Мало трафика</option>
+          <option>Высокая стоимость лида</option>
+          <option>Нет повторных продаж</option>
+        </select>
+      </div>
+      <button onclick="runAnalysis()">Проанализировать</button>
+    </div>
+  </div>
 
-    // Инициализация
-    let rawData = JSON.parse(localStorage.getItem('bizstreak'));
-    let data = {
-      streak: parseInt(rawData?.streak) || 0,
-      lastDate: rawData?.lastDate || '',
-      actions: Array.isArray(rawData?.actions) ? rawData.actions : [],
-      journal: rawData?.journal || '',
-      goal: parseInt(rawData?.goal) || 30,
-      stage: parseInt(rawData?.stage) || 1
-    };
-    const today = new Date().toISOString().split('T')[0];
+  <!-- Экран 3: Результат -->
+  <div id="screen-result" class="screen">
+    <header>
+      <h1>🧠 Рекомендации для вас</h1>
+      <p>На основе данных 1000+ успешных компаний</p>
+    </header>
+    <div style="padding: 30px;">
+      <div style="text-align:center; margin-bottom: 20px;">
+        <div class="niche-badge" id="niche-display">E-commerce</div>
+        <div class="score-display" id="score-display">78/100</div>
+      </div>
 
-    // Тема
-    function toggleTheme() {
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-      localStorage.setItem('theme', isDark ? 'light' : 'dark');
-      document.querySelector('.theme-toggle').textContent = isDark ? '🌙' : '☀️';
+      <div class="result-card">
+        <div id="recs-container"></div>
+        <div class="total-impact" id="total-impact">Общий прогноз: +24% эффективности</div>
+        <button onclick="submitPlan()">Применить выбранные улучшения</button>
+      </div>
+
+      <div class="feedback-form">
+        <h3>Ваше мнение важно</h3>
+        <form id="feedback-form" action="#" method="POST">
+          <input type="hidden" name="email" id="fb-email">
+          <div class="form-group">
+            <label>Насколько вы доверяете этим рекомендациям? (1–5)</label>
+            <select name="trust" required>
+              <option value="5">5 — Полностью доверяю</option>
+              <option value="4">4</option>
+              <option value="3">3 — Умеренно</option>
+              <option value="2">2</option>
+              <option value="1">1 — Не доверяю</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Что добавить?</label>
+            <textarea name="ideas" rows="2" placeholder="Например: интеграция с Telegram..."></textarea>
+          </div>
+          <button type="submit">Отправить фидбэк</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Экран 4: Подтверждение -->
+  <div id="screen-done" class="screen">
+    <header>
+      <h1>✅ Готово!</h1>
+      <p>Ваши улучшения в работе</p>
+    </header>
+    <div style="padding: 30px; text-align: center;">
+      <i class="fas fa-check-circle" style="font-size: 60px; color: var(--success); margin-bottom: 20px;"></i>
+      <p style="font-size: 18px;">Система начнёт оптимизацию в фоновом режиме.</p>
+      <p style="color: var(--gray); margin: 20px 0;">Вы получите отчёт через 7 дней на email.</p>
+      <button class="secondary" onclick="location.reload()">Протестировать снова</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // База знаний: рекомендации по нишам
+  const KNOWLEDGE_BASE = {
+    ecommerce: {
+      examples: "Как сделал Brandwatch: +34% конверсии через персонализированные email после abandoned cart",
+      recs: [
+        { text: "Запустите автоматическую серию email для брошенных корзин", impact: "High", roi: "+22% повторных продаж", auto: true },
+        { text: "Добавьте отзывы с фото на карточки товаров", impact: "Medium", roi: "+12% конверсии", auto: false },
+        { text: "Оптимизируйте мобильную версию под скорость загрузки", impact: "High", roi: "+18% удержания", auto: true }
+      ]
+    },
+    saas: {
+      examples: "Как сделал Notion: выросли органические лиды на 200% через контент-воронку",
+      recs: [
+        { text: "Создайте free-tier с онбордингом", impact: "High", roi: "+40% активации", auto: false },
+        { text: "Добавьте case studies в email-ньюслеттер", impact: "Medium", roi: "+15% доверия", auto: true },
+        { text: "Настройте триггерные сообщения по активности", impact: "High", roi: "+25% удержания", auto: true }
+      ]
+    },
+    coaching: {
+      examples: "Как сделал Алекс Бард: автоворонка приносит 30 лидов в день без рекламы",
+      recs: [
+        { text: "Создайте lead-magnet (чек-лист, гайд)", impact: "High", roi: "+50% подписок", auto: false },
+        { text: "Добавьте календарь бронирования прямо в email", impact: "Medium", roi: "+30% встреч", auto: true },
+        { text: "Запишите серию коротких видео-уроков", impact: "High", roi: "+45% вовлечённости", auto: false }
+      ]
+    },
+    agency: {
+      examples: "Как сделал Nolt: 80% клиентов приходят через case studies",
+      recs: [
+        { text: "Опубликуйте 3 подробных кейса с метриками", impact: "High", roi: "+35% квалифицированных лидов", auto: false },
+        { text: "Настройте LinkedIn-воронку с ретаргетингом", impact: "Medium", roi: "+20% встреч", auto: true },
+        { text: "Автоматизируйте отчётность для клиентов", impact: "High", roi: "+25% удержания", auto: true }
+      ]
+    },
+    content: {
+      examples: "Как сделал Ali Abdaal: YouTube → email → курс = $1M/год",
+      recs: [
+        { text: "Добавьте CTA в конец каждого видео/поста", impact: "High", roi: "+40% подписок", auto: true },
+        { text: "Сегментируйте аудиторию по интересам", impact: "Medium", roi: "+25% открытий", auto: true },
+        { text: "Создайте платный мини-продукт ($7–27)", impact: "High", roi: "+30% монетизации", auto: false }
+      ]
     }
-    const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    document.querySelector('.theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+  };
 
-    // Показ идеи
-    function showRandomIdea() {
-      const randomIdea = ideas[Math.floor(Math.random() * ideas.length)];
-      document.getElementById('dailyIdea').textContent = `💡 Идея дня: ${randomIdea}`;
+  function startSession() {
+    const email = document.getElementById('user-email').value;
+    if (!email || !email.includes('@')) {
+      alert('Пожалуйста, введите корректный email');
+      return;
     }
+    localStorage.setItem('autopilot_email', email);
+    document.getElementById('fb-email').value = email;
+    showScreen('screen-survey');
+  }
 
-    // Обновление интерфейса
-    function render() {
-      // Приведение к числу (защита от NaN)
-      data.streak = parseInt(data.streak) || 0;
-      data.goal = parseInt(data.goal) || 30;
-      data.stage = parseInt(data.stage) || 1;
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
 
-      document.getElementById('count').textContent = data.streak;
-      
-      let rewardText = '';
-      if (data.streak >= 30) rewardText = '🚀 Ты — бизнесмен! Твоя привычка устойчива.';
-      else if (data.streak >= 21) rewardText = '🌱 Твоя предпринимательская привычка закреплена!';
-      else if (data.streak >= 7) rewardText = '🎉 Ты в зоне роста!';
-      document.getElementById('reward').textContent = rewardText;
+  function runAnalysis() {
+    const nicheKey = document.getElementById('niche').value;
+    const nicheData = KNOWLEDGE_BASE[nicheKey];
+    const nicheName = document.getElementById('niche').options[document.getElementById('niche').selectedIndex].text;
 
-      const progress = Math.min(data.streak, data.goal);
-      const percent = Math.floor((progress / data.goal) * 100);
-      const bar = '█'.repeat(Math.floor(percent / 10)).padEnd(10, '░');
-      document.getElementById('progressBar').textContent = bar;
-      document.getElementById('progressText').textContent = `${progress}/${data.goal}`;
-      
-      const stages = document.querySelectorAll('.stage');
-      stages.forEach((stage, i) => {
-        stage.classList.toggle('active', i + 1 <= data.stage);
-      });
+    let html = `<p class="example">${nicheData.examples}</p>`;
+    let totalRoi = 0;
+    let recCount = 0;
 
-      document.getElementById('journal').value = data.journal;
-
-      const list = document.getElementById('historyList');
-      list.innerHTML = data.actions.map(a => 
-        `<div class="entry">${a.text}<div class="date">${a.date}</div></div>`
-      ).join('');
-
-      if (data.streak > 0 && data.streak % 7 === 0) {
-        const actionsText = data.actions.map(a => a.text).join(' ');
-        let insight = 'Продолжай в том же духе!';
-        if (actionsText.includes('клиент') || actionsText.includes('написал')) {
-          insight = 'Ты отлично общаешься с клиентами — это твоя сила!';
-        } else if (actionsText.includes('идея') || actionsText.includes('записал')) {
-          insight = 'Ты генерируешь идеи — теперь выбери одну и протестируй!';
-        }
-        document.getElementById('analysis').textContent = `🧠 Недельный анализ: ${insight}`;
-      } else {
-        document.getElementById('analysis').textContent = '';
-      }
-
-      if (data.streak >= 5 && data.stage < 2) data.stage = 2;
-      if (data.streak >= 15 && data.stage < 3) data.stage = 3;
-      if (data.streak >= 30 && data.stage < 4) data.stage = 4;
-    }
-
-    // Действие
-    function logAction() {
-      const text = document.getElementById('action').value.trim();
-      if (!text) return alert('Напиши, что ты сделал!');
-      
-      if (data.lastDate === today) {
-        alert('Ты уже сделал шаг сегодня! Молодец!');
-        return;
-      }
-
-      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-      if (data.lastDate === yesterday || data.lastDate === '') {
-        data.streak = (parseInt(data.streak) || 0) + 1;
-      } else {
-        data.streak = 1;
-      }
-      
-      data.lastDate = today;
-      data.actions.unshift({ date: today, text });
-      if (data.actions.length > 50) data.actions.pop();
-
-      // Сохраняем только числа как числа
-      localStorage.setItem('bizstreak', JSON.stringify({
-        streak: data.streak,
-        lastDate: data.lastDate,
-        actions: data.actions,
-        journal: data.journal,
-        goal: data.goal,
-        stage: data.stage
-      }));
-
-      document.getElementById('action').value = '';
-      render();
-
-      if (data.streak === 7) {
-        createConfetti();
-      }
-      alert('✅ Шаг зафиксирован! Ты молодец!');
-    }
-
-    // Страхи
-    function openFears() {
-      const fear = prompt('Что тебя останавливает?\n1. Страх неудачи\n2. Нет времени\n3. Не знаю с чего\n4. Боюсь осуждения');
-      const responses = {
-        '1': 'Страх неудачи — признак, что ты растёшь. Ошибки — это данные, а не провал.',
-        '2': 'Время появляется, когда ты делаешь шаг. Начни с 5 минут.',
-        '3': 'Не нужно "знать всё". Нужно сделать первое действие.',
-        '4': 'Ты не для всех. Ты — для своих клиентов.'
-      };
-      alert(responses[fear] || 'Ты сильнее, чем думаешь. Сделай шаг — и страх уйдёт.');
-    }
-
-    // Сброс
-    function resetStreak() {
-      if (confirm('Ты уверен? Твоя цепочка обнулится, но ты начнёшь заново — и это честно.')) {
-        data.streak = 0;
-        data.lastDate = '';
-        data.stage = 1;
-        localStorage.setItem('bizstreak', JSON.stringify(data));
-        render();
-        alert('Ты снова в игре! Сделай шаг — и цепочка начнётся.');
-      }
-    }
-
-    // Экспорт отчёта
-    function copyReport() {
-      let report = `BizStreak — ${data.streak} дней подряд\n\n`;
-      data.actions.forEach(a => {
-        report += `• ${a.date}: ${a.text}\n`;
-      });
-      if (data.journal) {
-        report += `\nДневник:\n${data.journal}\n`;
-      }
-      report += `\n#bizstreak #микростарт #бизнес`;
-      
-      navigator.clipboard.writeText(report).then(() => {
-        alert('📋 Отчёт скопирован! Вставь в заметки, Instagram или Telegram.');
-      });
-    }
-
-    // Экспорт в PDF
-    function exportPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      doc.setFontSize(20);
-      doc.text('BizStreak — Твой путь к бизнесу', 20, 20);
-      doc.setFontSize(12);
-      doc.text(`Цепочка: ${data.streak} дней`, 20, 30);
-      let y = 40;
-      data.actions.slice(0, 20).forEach(a => {
-        doc.text(`• ${a.date}: ${a.text}`, 20, y);
-        y += 6;
-      });
-      if (data.journal) {
-        doc.text('Дневник:', 20, y + 10);
-        const lines = doc.splitTextToSize(data.journal, 170);
-        doc.text(lines, 20, y + 16);
-      }
-      doc.save('bizstreak-report.pdf');
-    }
-
-    // Конфетти
-    function createConfetti() {
-      const canvas = document.createElement('canvas');
-      canvas.className = 'confetti';
-      document.body.appendChild(canvas);
-      const ctx = canvas.getContext('2d');
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      const pieces = [];
-      const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722'];
-      for (let i = 0; i < 150; i++) {
-        pieces.push({
-          x: Math.random() * canvas.width,
-          y: -20,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          radius: Math.random() * 4 + 2,
-          speed: Math.random() * 3 + 2,
-          angle: Math.random() * Math.PI * 2,
-          spin: Math.random() * 0.2 - 0.1
-        });
-      }
-      let time = 0;
-      const animate = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        let alive = false;
-        pieces.forEach(p => {
-          p.y += p.speed;
-          p.x += Math.sin(time * 0.01 + p.angle) * 2;
-          ctx.fillStyle = p.color;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-          ctx.fill();
-          if (p.y < canvas.height) alive = true;
-        });
-        time++;
-        if (alive && time < 300) {
-          requestAnimationFrame(animate);
-        } else {
-          canvas.remove();
-        }
-      };
-      animate();
-    }
-
-    // Сохранение дневника
-    document.getElementById('journal').addEventListener('blur', () => {
-      data.journal = document.getElementById('journal').value;
-      localStorage.setItem('bizstreak', JSON.stringify(data));
+    nicheData.recs.forEach((r, i) => {
+      const roiNum = parseFloat(r.roi.replace(/[^\d.-]/g, ''));
+      totalRoi += roiNum;
+      recCount++;
+      html += `
+        <div class="rec-item">
+          <div class="impact-tag">${r.impact === 'High' ? '🔥 Высокое' : '💡 Среднее'}</div>
+          ${r.text}
+          <div class="roi-preview"><i class="fas fa-chart-line"></i> Прогноз: ${r.roi}</div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="rec-${i}" ${r.auto ? 'checked' : ''}>
+            <label for="rec-${i}">${r.auto ? 'Применить автоматически (без моего участия)' : 'Хочу внедрить вручную'}</label>
+          </div>
+        </div>
+      `;
     });
 
-    // Запуск
-    showRandomIdea();
-    render();
-  </script>
+    const avgRoi = Math.round(totalRoi / recCount);
+    document.getElementById('niche-display').innerText = nicheName;
+    document.getElementById('score-display').innerText = `${70 + avgRoi/3}/100`;
+    document.getElementById('total-impact').innerText = `Общий прогноз: +${avgRoi}% эффективности`;
+    document.getElementById('recs-container').innerHTML = html;
+    showScreen('screen-result');
+  }
+
+  function submitPlan() {
+    // Имитация отправки
+    showScreen('screen-done');
+    // В реальности: отправка выбранных галочек на ваш сервер
+  }
+
+  // Защита от ошибок в песочнице
+  try {
+    if (localStorage.getItem('autopilot_email')) {
+      document.getElementById('user-email').value = localStorage.getItem('autopilot_email');
+    }
+  } catch (e) {
+    console.warn('localStorage недоступен. Работаем в ограниченном режиме.');
+  }
+</script>
+
 </body>
 </html>
