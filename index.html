@@ -3,389 +3,332 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AutoPilot.Marketing v2 — умный маркетинг</title>
+  <title>Микро-ЗОЖ — Тест</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     :root {
-      --primary: #4f46e5;
-      --primary-dark: #4338ca;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --light: #f8fafc;
-      --gray: #64748b;
-      --dark: #1e293b;
-      --card: #ffffff;
+      --primary: #4caf50;
+      --primary-dark: #388e3c;
+      --light-bg: #f9fbf9;
+      --card-bg: #ffffff;
+      --text: #2d5a27;
+      --text-light: #668b63;
     }
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: var(--light);
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      color: var(--dark);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--light-bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 0;
+      margin: 0;
     }
     .container {
-      max-width: 850px;
+      max-width: 500px;
       margin: 0 auto;
-      background: var(--card);
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-      overflow: hidden;
+      padding: 20px;
+      min-height: 100vh;
     }
-    header {
-      background: linear-gradient(135deg, var(--primary), #7e22ce);
-      color: white;
-      padding: 30px 24px;
+    .screen {
+      display: none;
+      padding: 25px 0;
       text-align: center;
     }
-    header h1 { margin: 0; font-weight: 800; font-size: 28px; }
-    header p { opacity: 0.95; margin-top: 8px; font-size: 17px; }
-
-    .screen { display: none; padding: 30px; }
-    .active { display: block !important; }
-
-    .form-group {
-      margin-bottom: 22px;
+    .screen.active { display: block; }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 12px;
+      color: var(--primary-dark);
     }
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: var(--dark);
+    h2 {
+      font-size: 22px;
+      margin: 20px 0 15px;
     }
-    input, select, textarea {
-      width: 100%;
-      padding: 14px;
-      border: 1px solid #cbd5e1;
-      border-radius: 12px;
-      font-size: 16px;
-      box-sizing: border-box;
+    p {
+      margin: 12px 0;
+      color: var(--text-light);
     }
-    button {
+    .subtitle {
+      font-size: 18px;
+      margin: 15px 0 25px;
+      color: var(--text);
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 25px;
+      margin: 20px 0;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    .task-text {
+      font-size: 19px;
+      line-height: 1.5;
+      margin: 25px 0;
+      padding: 16px;
+      background: #f0f9f1;
+      border-radius: 16px;
+      border-left: 4px solid var(--primary);
+    }
+    .tree-container {
+      margin: 20px 0;
+    }
+    .tree {
+      font-size: 80px;
+      transition: transform 0.4s ease;
+    }
+    .tree.grow { transform: scale(1.15); }
+    .btn {
+      display: inline-block;
       background: var(--primary);
       color: white;
       border: none;
-      padding: 16px;
-      border-radius: 12px;
+      border-radius: 50px;
+      padding: 14px 28px;
       font-size: 17px;
-      font-weight: 600;
+      margin: 10px 8px;
       cursor: pointer;
-      width: 100%;
-      margin-top: 10px;
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.1s;
+      width: 90%;
+      max-width: 300px;
     }
-    button:hover { background: var(--primary-dark); }
-    button.secondary {
-      background: #f1f5f9;
-      color: var(--dark);
+    .btn:hover {
+      background: var(--primary-dark);
     }
-    button.secondary:hover { background: #e2e8f0; }
-
-    .result-card {
-      background: #f8fafc;
-      border-radius: 16px;
-      padding: 24px;
-      margin-top: 20px;
-      border: 1px solid #e2e8f0;
+    .btn:active {
+      transform: scale(0.97);
     }
-    .score-display {
-      text-align: center;
-      font-size: 36px;
-      font-weight: 800;
-      color: var(--success);
-      margin: 15px 0;
+    .btn-outline {
+      background: transparent;
+      border: 2px solid #ccd8cc;
+      color: var(--text-light);
     }
-    .niche-badge {
-      background: #eef2ff;
-      color: var(--primary-dark);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-weight: 600;
-      display: inline-block;
-      margin-bottom: 15px;
+    .btn-outline:hover {
+      background: #f0f6f0;
     }
-    .rec-item {
-      background: white;
-      padding: 20px;
-      border-radius: 14px;
-      margin: 18px 0;
-      border-left: 4px solid var(--primary);
-      position: relative;
-    }
-    .impact-tag {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      background: var(--warning);
-      color: white;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-    }
-    .roi-preview {
-      background: #ecfdf5;
-      color: #065f46;
-      padding: 10px;
-      border-radius: 10px;
-      margin-top: 12px;
-      font-weight: 600;
-    }
-    .example {
-      background: #f0f9ff;
-      border-left: 3px solid #38bdf8;
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 12px;
-      font-style: italic;
-      font-size: 14px;
-    }
-    .checkbox-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
-    }
-    .checkbox-group input {
-      width: auto;
-      margin-right: 8px;
-    }
-    .feedback-form {
+    .footer {
       margin-top: 30px;
-      padding-top: 25px;
-      border-top: 1px dashed #cbd5e1;
+      font-size: 13px;
+      color: #999;
     }
-    .total-impact {
-      text-align: center;
-      font-size: 20px;
-      font-weight: 700;
+    .icon {
+      font-size: 24px;
+      margin-bottom: 12px;
       color: var(--primary);
-      margin: 20px 0;
-      padding: 15px;
-      background: #eef2ff;
-      border-radius: 12px;
     }
+    .habit-map {
+      background: #f0f9f1;
+      padding: 20px;
+      border-radius: 16px;
+      margin: 20px 0;
+    }
+    .habit-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px dashed #c8e0c8;
+    }
+    .habit-item:last-child { border: none; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- Экран 1: Вход -->
-  <div id="screen-login" class="screen active">
-    <header>
-      <h1>🚀 AutoPilot.Marketing</h1>
-      <p>Маркетинг, который улучшается сам</p>
-    </header>
-    <div style="padding: 30px;">
-      <div class="form-group">
-        <label>Ваш email</label>
-        <input type="email" id="user-email" placeholder="you@company.com" required>
-      </div>
-      <button onclick="startSession()">Продолжить →</button>
+  <!-- Приветствие -->
+  <div id="intro" class="screen active">
+    <div class="icon"><i class="fas fa-seedling"></i></div>
+    <h1>Микро-ЗОЖ</h1>
+    <p class="subtitle">Здоровый образ жизни без стресса</p>
+    <div class="card">
+      <p>Здесь нет диет, тренировок на час и чувства вины.</p>
+      <p>Только <strong>одно простое действие в день</strong> — менее 2 минут.</p>
+      <p>Через неделю вы удивитесь, как много изменилось.</p>
     </div>
+    <button class="btn" onclick="showCategorySelect()">Начать</button>
   </div>
 
-  <!-- Экран 2: Опрос -->
-  <div id="screen-survey" class="screen">
-    <header>
-      <h1>🔍 Краткий опрос</h1>
-      <p>Чтобы дать персонализированные рекомендации</p>
-    </header>
-    <div style="padding: 30px;">
-      <div class="form-group">
-        <label>Ваш тип бизнеса</label>
-        <select id="niche">
-          <option value="ecommerce">E-commerce (онлайн-магазин)</option>
-          <option value="saas">SaaS / IT-продукт</option>
-          <option value="coaching">Коучинг / консультации</option>
-          <option value="agency">Агентство</option>
-          <option value="content">Контент / медиа</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Ваш сайт</label>
-        <input type="url" id="website" placeholder="https://ваш-сайт.рф" value="https://example.com">
-      </div>
-      <div class="form-group">
-        <label>Среднее количество лидов/продаж в неделю</label>
-        <input type="number" id="volume" min="1" value="50">
-      </div>
-      <div class="form-group">
-        <label>Основная проблема</label>
-        <select id="pain">
-          <option>Низкая конверсия</option>
-          <option>Мало трафика</option>
-          <option>Высокая стоимость лида</option>
-          <option>Нет повторных продаж</option>
-        </select>
-      </div>
-      <button onclick="runAnalysis()">Проанализировать</button>
-    </div>
+  <!-- Выбор категории -->
+  <div id="category" class="screen">
+    <h2>Что хочешь улучшить в первую очередь?</h2>
+    <button class="btn" onclick="startJourney('питание')"><i class="fas fa-carrot"></i> Питание</button>
+    <button class="btn" onclick="startJourney('сон')"><i class="fas fa-moon"></i> Сон и отдых</button>
+    <button class="btn" onclick="startJourney('энергия')"><i class="fas fa-bolt"></i> Энергия</button>
   </div>
 
-  <!-- Экран 3: Результат -->
-  <div id="screen-result" class="screen">
-    <header>
-      <h1>🧠 Рекомендации для вас</h1>
-      <p>На основе данных 1000+ успешных компаний</p>
-    </header>
-    <div style="padding: 30px;">
-      <div style="text-align:center; margin-bottom: 20px;">
-        <div class="niche-badge" id="niche-display">E-commerce</div>
-        <div class="score-display" id="score-display">78/100</div>
-      </div>
+  <!-- Основной экран -->
+  <div id="main" class="screen">
+    <h2>Твоё микро-действие сегодня:</h2>
+    <div class="task-text" id="taskText">Загрузка...</div>
 
-      <div class="result-card">
-        <div id="recs-container"></div>
-        <div class="total-impact" id="total-impact">Общий прогноз: +24% эффективности</div>
-        <button onclick="submitPlan()">Применить выбранные улучшения</button>
-      </div>
-
-      <div class="feedback-form">
-        <h3>Ваше мнение важно</h3>
-        <form id="feedback-form" action="#" method="POST">
-          <input type="hidden" name="email" id="fb-email">
-          <div class="form-group">
-            <label>Насколько вы доверяете этим рекомендациям? (1–5)</label>
-            <select name="trust" required>
-              <option value="5">5 — Полностью доверяю</option>
-              <option value="4">4</option>
-              <option value="3">3 — Умеренно</option>
-              <option value="2">2</option>
-              <option value="1">1 — Не доверяю</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Что добавить?</label>
-            <textarea name="ideas" rows="2" placeholder="Например: интеграция с Telegram..."></textarea>
-          </div>
-          <button type="submit">Отправить фидбэк</button>
-        </form>
-      </div>
+    <div class="tree-container">
+      <div class="tree" id="tree">🌱</div>
     </div>
+
+    <button class="btn" onclick="completeTask()">✅ Выполнено!</button>
+    <button class="btn btn-outline" onclick="skipTask()">Не сегодня</button>
+
+    <div class="footer" id="progressHint">Ты можешь пропустить — без последствий.</div>
   </div>
 
-  <!-- Экран 4: Подтверждение -->
-  <div id="screen-done" class="screen">
-    <header>
-      <h1>✅ Готово!</h1>
-      <p>Ваши улучшения в работе</p>
-    </header>
-    <div style="padding: 30px; text-align: center;">
-      <i class="fas fa-check-circle" style="font-size: 60px; color: var(--success); margin-bottom: 20px;"></i>
-      <p style="font-size: 18px;">Система начнёт оптимизацию в фоновом режиме.</p>
-      <p style="color: var(--gray); margin: 20px 0;">Вы получите отчёт через 7 дней на email.</p>
-      <button class="secondary" onclick="location.reload()">Протестировать снова</button>
-    </div>
+  <!-- Экран поддержки -->
+  <div id="support" class="screen">
+    <div class="icon"><i class="fas fa-heart"></i></div>
+    <h2>Всё в порядке 💚</h2>
+    <p>Завтра будет новое простое действие.</p>
+    <p>Ты уже герой — потому что хотя бы **захотел(а) начать**.</p>
+    <button class="btn" onclick="backToMain()">Хорошо</button>
+  </div>
+
+  <!-- Карта привычек (после 3 дней) -->
+  <div id="habitMap" class="screen">
+    <h2>Ты уже 3 дня в деле! 🎉</h2>
+    <p>Вот твои микро-привычки:</p>
+    <div class="habit-map" id="habitList"></div>
+    <button class="btn" onclick="backToMain()">Продолжить</td>
   </div>
 </div>
 
 <script>
-  // База знаний: рекомендации по нишам
-  const KNOWLEDGE_BASE = {
-    ecommerce: {
-      examples: "Как сделал Brandwatch: +34% конверсии через персонализированные email после abandoned cart",
-      recs: [
-        { text: "Запустите автоматическую серию email для брошенных корзин", impact: "High", roi: "+22% повторных продаж", auto: true },
-        { text: "Добавьте отзывы с фото на карточки товаров", impact: "Medium", roi: "+12% конверсии", auto: false },
-        { text: "Оптимизируйте мобильную версию под скорость загрузки", impact: "High", roi: "+18% удержания", auto: true }
-      ]
-    },
-    saas: {
-      examples: "Как сделал Notion: выросли органические лиды на 200% через контент-воронку",
-      recs: [
-        { text: "Создайте free-tier с онбордингом", impact: "High", roi: "+40% активации", auto: false },
-        { text: "Добавьте case studies в email-ньюслеттер", impact: "Medium", roi: "+15% доверия", auto: true },
-        { text: "Настройте триггерные сообщения по активности", impact: "High", roi: "+25% удержания", auto: true }
-      ]
-    },
-    coaching: {
-      examples: "Как сделал Алекс Бард: автоворонка приносит 30 лидов в день без рекламы",
-      recs: [
-        { text: "Создайте lead-magnet (чек-лист, гайд)", impact: "High", roi: "+50% подписок", auto: false },
-        { text: "Добавьте календарь бронирования прямо в email", impact: "Medium", roi: "+30% встреч", auto: true },
-        { text: "Запишите серию коротких видео-уроков", impact: "High", roi: "+45% вовлечённости", auto: false }
-      ]
-    },
-    agency: {
-      examples: "Как сделал Nolt: 80% клиентов приходят через case studies",
-      recs: [
-        { text: "Опубликуйте 3 подробных кейса с метриками", impact: "High", roi: "+35% квалифицированных лидов", auto: false },
-        { text: "Настройте LinkedIn-воронку с ретаргетингом", impact: "Medium", roi: "+20% встреч", auto: true },
-        { text: "Автоматизируйте отчётность для клиентов", impact: "High", roi: "+25% удержания", auto: true }
-      ]
-    },
-    content: {
-      examples: "Как сделал Ali Abdaal: YouTube → email → курс = $1M/год",
-      recs: [
-        { text: "Добавьте CTA в конец каждого видео/поста", impact: "High", roi: "+40% подписок", auto: true },
-        { text: "Сегментируйте аудиторию по интересам", impact: "Medium", roi: "+25% открытий", auto: true },
-        { text: "Создайте платный мини-продукт ($7–27)", impact: "High", roi: "+30% монетизации", auto: false }
-      ]
-    }
+  // База микро-привычек
+  const HABITS = {
+    питание: [
+      "Добавь в обед 1 горсть овощей (даже замороженных).",
+      "Выпей стакан воды перед едой.",
+      "Замени сладкий напиток на воду с лимоном.",
+      "Ешь из маленькой тарелки — так насытишься быстрее.",
+      "Положи фрукт на видное место — ты его съешь."
+    ],
+    сон: [
+      "За 45 минут до сна выключи все экраны.",
+      "Прочитай 1 страницу книги (не с телефона!).",
+      "Сделай тише свет в комнате за час до сна.",
+      "Ложись спать на 15 минут раньше обычного.",
+      "Поставь будильник на одно и то же время даже в выходные."
+    ],
+    энергия: [
+      "Сделай 3 глубоких вдоха, как будто пьёшь горячий чай.",
+      "Пройди 2 минуты быстрым шагом (даже по квартире).",
+      "Посмотри в окно 60 секунд — без телефона.",
+      "Скажи себе: «Я уже молодец».",
+      "Сделай 1 комплимент себе в зеркале."
+    ]
   };
 
-  function startSession() {
-    const email = document.getElementById('user-email').value;
-    if (!email || !email.includes('@')) {
-      alert('Пожалуйста, введите корректный email');
+  // Хранилище
+  let userData = JSON.parse(localStorage.getItem('microZozhUser')) || {
+    category: null,
+    completed: [],
+    lastTask: null
+  };
+
+  // Вспомогательные функции
+  function todayStr() {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  function getRandomHabit(category, exclude = null) {
+    const list = HABITS[category] || HABITS.энергия;
+    let candidates = exclude ? list.filter(h => h !== exclude) : list;
+    if (candidates.length === 0) candidates = list;
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  }
+
+  function updateTree() {
+    const tree = document.getElementById('tree');
+    const days = userData.completed.length;
+    if (days === 0) tree.textContent = '🌱';
+    else if (days < 3) tree.textContent = '🌿';
+    else if (days < 7) tree.textContent = '🌳';
+    else tree.textContent = '🌲';
+
+    tree.classList.remove('grow');
+    void tree.offsetWidth; // триггер анимации
+    tree.classList.add('grow');
+  }
+
+  function showTask() {
+    const today = todayStr();
+    const alreadyDone = userData.completed.some(d => d.date === today);
+
+    if (alreadyDone) {
+      document.getElementById('taskText').textContent = "Ты уже выполнил(а) задание на сегодня! Отличная работа 💚";
+      document.querySelector('#main .btn').style.display = 'none';
       return;
     }
-    localStorage.setItem('autopilot_email', email);
-    document.getElementById('fb-email').value = email;
-    showScreen('screen-survey');
+
+    const task = getRandomHabit(userData.category, userData.lastTask);
+    userData.lastTask = task;
+    document.getElementById('taskText').textContent = task;
+    document.querySelector('#main .btn').style.display = 'inline-block';
   }
 
-  function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+  // Экраны
+  function showCategorySelect() {
+    document.getElementById('intro').classList.remove('active');
+    document.getElementById('category').classList.add('active');
   }
 
-  function runAnalysis() {
-    const nicheKey = document.getElementById('niche').value;
-    const nicheData = KNOWLEDGE_BASE[nicheKey];
-    const nicheName = document.getElementById('niche').options[document.getElementById('niche').selectedIndex].text;
-
-    let html = `<p class="example">${nicheData.examples}</p>`;
-    let totalRoi = 0;
-    let recCount = 0;
-
-    nicheData.recs.forEach((r, i) => {
-      const roiNum = parseFloat(r.roi.replace(/[^\d.-]/g, ''));
-      totalRoi += roiNum;
-      recCount++;
-      html += `
-        <div class="rec-item">
-          <div class="impact-tag">${r.impact === 'High' ? '🔥 Высокое' : '💡 Среднее'}</div>
-          ${r.text}
-          <div class="roi-preview"><i class="fas fa-chart-line"></i> Прогноз: ${r.roi}</div>
-          <div class="checkbox-group">
-            <input type="checkbox" id="rec-${i}" ${r.auto ? 'checked' : ''}>
-            <label for="rec-${i}">${r.auto ? 'Применить автоматически (без моего участия)' : 'Хочу внедрить вручную'}</label>
-          </div>
-        </div>
-      `;
-    });
-
-    const avgRoi = Math.round(totalRoi / recCount);
-    document.getElementById('niche-display').innerText = nicheName;
-    document.getElementById('score-display').innerText = `${70 + avgRoi/3}/100`;
-    document.getElementById('total-impact').innerText = `Общий прогноз: +${avgRoi}% эффективности`;
-    document.getElementById('recs-container').innerHTML = html;
-    showScreen('screen-result');
+  function startJourney(cat) {
+    userData.category = cat;
+    localStorage.setItem('microZozhUser', JSON.stringify(userData));
+    document.getElementById('category').classList.remove('active');
+    document.getElementById('main').classList.add('active');
+    showTask();
+    updateTree();
   }
 
-  function submitPlan() {
-    // Имитация отправки
-    showScreen('screen-done');
-    // В реальности: отправка выбранных галочек на ваш сервер
-  }
-
-  // Защита от ошибок в песочнице
-  try {
-    if (localStorage.getItem('autopilot_email')) {
-      document.getElementById('user-email').value = localStorage.getItem('autopilot_email');
+  function completeTask() {
+    const today = todayStr();
+    if (!userData.completed.some(d => d.date === today)) {
+      userData.completed.push({ date: today, task: userData.lastTask });
+      localStorage.setItem('microZozhUser', JSON.stringify(userData));
+      
+      // Показ карты после 3 дней
+      if (userData.completed.length === 3) {
+        showHabitMap();
+        return;
+      }
+      
+      alert('Отлично! Ты сделал(а) ещё один микро-шаг к здоровой жизни 💚');
+      updateTree();
     }
-  } catch (e) {
-    console.warn('localStorage недоступен. Работаем в ограниченном режиме.');
+    showTask();
+  }
+
+  function skipTask() {
+    document.getElementById('main').classList.remove('active');
+    document.getElementById('support').classList.add('active');
+  }
+
+  function backToMain() {
+    document.getElementById('support').classList.remove('active');
+    document.getElementById('habitMap').classList.remove('active');
+    document.getElementById('main').classList.add('active');
+    showTask();
+  }
+
+  function showHabitMap() {
+    document.getElementById('main').classList.remove('active');
+    const listEl = document.getElementById('habitList');
+    listEl.innerHTML = '';
+    userData.completed.slice(-3).forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'habit-item';
+      div.innerHTML = `<span>День ${i+1}</span> <span>${item.task}</span>`;
+      listEl.appendChild(div);
+    });
+    document.getElementById('habitMap').classList.add('active');
+  }
+
+  // Инициализация
+  if (userData.category) {
+    document.getElementById('intro').classList.remove('active');
+    document.getElementById('main').classList.add('active');
+    showTask();
+    updateTree();
   }
 </script>
 
